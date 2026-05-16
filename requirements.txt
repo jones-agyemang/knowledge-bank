@@ -1,1 +1,2 @@
 langsmith[openai-agents]
+python-dotenv

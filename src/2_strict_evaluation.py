@@ -55,7 +55,6 @@ def quiz_master(inputs: dict) -> dict:
     response = oai_client.chat.completions.create(
         messages=messages, model="gpt-5.4-mini", temperature=0
     )
-
     return { "answer": response.choices[0].message.content }
 
 def correct(inputs: dict, outputs: dict, reference_outputs: dict) -> bool:

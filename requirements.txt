@@ -1,3 +1,6 @@
+langsmith
 langsmith[openai-agents]
 python-dotenv
-langsmith
+pydantic
+pytest
+pytest-recording

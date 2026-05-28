@@ -3,4 +3,5 @@ langsmith[openai-agents]
 python-dotenv
 pydantic
 pytest
+pytest-describe
 pytest-recording

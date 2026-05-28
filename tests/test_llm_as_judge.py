@@ -2,7 +2,6 @@ from src.llm_as_judge import judgement
 from src.llm_as_judge import correctness_evaluator
 from unittest.mock import patch
 from langsmith.evaluation import EvaluationResult
-# from langsmith.utils import DynamicRunEvaluator
 
 import pytest
 
@@ -13,15 +12,9 @@ def vcr_config():
 @pytest.mark.vcr
 @pytest.mark.skip(reason="Mock network calls")
 def test_valid_judgement_response():
-    inputs = {
-        'question': 'What is a fish?',
-    }
-    outputs = {
-        'question_response': 'An animal that lives in water.'
-    }
-    reference_outputs = {
-        'answer': 'A fish is an aquatic, gill-bearing vetebrate animal.',
-    }
+    inputs = { 'question': 'What is a fish?' }
+    outputs = { 'question_response': 'An animal that lives in water.' }
+    reference_outputs = { 'answer': 'A fish is an aquatic, gill-bearing vetebrate animal.' }
 
     expected_response = { 
         "score": 0.9,

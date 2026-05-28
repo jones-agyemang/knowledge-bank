@@ -4,6 +4,7 @@ LLM AS JUDGE
 PoC for to free-text, Rubrics-based evaluation of LLM output
 """
 
+import asyncio
 from openai import OpenAI
 from pydantic import BaseModel
 from dotenv import load_dotenv
@@ -100,7 +101,7 @@ def fetch_dataset(ls_client):
     except LangSmithConflictError:
         return ls_client.read_dataset(dataset_name="Mini Knowledge Bank")
 
-def main() -> None:
+async def main() -> None:
     ls_client = Client()
     dataset = fetch_dataset(ls_client)
 
@@ -112,4 +113,4 @@ def main() -> None:
     )
 
 if __name__ == '__main__':
-    main()
+    asyncio.run(main())

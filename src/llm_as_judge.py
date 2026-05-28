@@ -56,8 +56,27 @@ def correctness_evaluator(
             comment="Error whilst evaluating data point"
         )
 
+SYSTEN_RUBRIC_PROMPT = """
+You are an expert evaluator. Grade the model's response based on the following criteria:
 
-class Response(BaseModel):
+    1. Accuracy (0-3 points):
+        - 3 points: Response is perfectly accurate based on reference data
+        - 2 points: Response is mostly accurate, minor details missing
+        - 1 point: Significant inaccuracies or omissions
+        - 0 points: Completely incorrect or non-responsive
+
+    2. Reasoning Consistency:
+        - Check if the provided reasoning logicallt supports the final answer
+        - Deduct 1 point if the reasoning is flawed, even if the answer is correct
+
+    Output your evaluation strictly in the following JSON format:
+    {
+        "score": (integer),
+        "explanation": "Detailed explanation of your scoring"
+    }
+"""
+
+class EvaluationResponse(BaseModel):
     score: float = 0.0
     explanation: str = ""
 
@@ -74,8 +93,6 @@ def judgement(
     #Returns:
     #   response (dict): e.g. { "score": "0.82", explanation: "Commendable response with minor missing details" }
 
-    instructions = ("You are a fair judge for a free-text quiz competition")
-
     message_content = f"""
         Question: {inputs['question']}. 
         Response: {outputs['question_response']}. 
@@ -83,7 +100,7 @@ def judgement(
     """
 
     messages = [
-        { "role": "system", "content": instructions },
+        { "role": "system", "content": SYSTEN_RUBRIC_PROMPT },
         { "role": "user", "content": message_content }
     ]
 
@@ -91,7 +108,7 @@ def judgement(
         messages=messages,
         model="gpt-5.4-mini",
         temperature=0,
-        response_format=Response
+        response_format=EvaluationResponse
     )
     return response.choices[0].message.parsed.model_dump()
 

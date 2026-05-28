@@ -1,6 +1,6 @@
 from src.llm_as_judge import judgement
 from src.llm_as_judge import correctness_evaluator
-from src.llm_as_judge import Response
+from src.llm_as_judge import EvaluationResponse
 
 from unittest.mock import patch
 from langsmith.evaluation import EvaluationResult
@@ -29,7 +29,7 @@ def describe_judgement():
                     choices=[
                         ns(
                             message=ns(
-                                parsed=Response(
+                                parsed=EvaluationResponse(
                                     score=0.9,
                                     explanation="The response is essentially correct and matches the core idea of the answer: a fish is an aquatic animal that lives in water. It omits details like being a vertebrate and gill-bearing, but it is still a good paraphrase."
                                 )

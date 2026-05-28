@@ -1,0 +1,2 @@
+[tool.pytest.ini_options]
+describe_prefixes = ["describe_", "when_"]

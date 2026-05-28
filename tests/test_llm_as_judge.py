@@ -1,7 +1,10 @@
 from src.llm_as_judge import judgement
 from src.llm_as_judge import correctness_evaluator
+from src.llm_as_judge import Response
+
 from unittest.mock import patch
 from langsmith.evaluation import EvaluationResult
+from types import SimpleNamespace as ns
 
 import pytest
 
@@ -9,22 +12,39 @@ import pytest
 def vcr_config():
     return { "filter_headers": ["authorization"] }
 
-@pytest.mark.vcr
-@pytest.mark.skip(reason="Mock network calls")
-def test_valid_judgement_response():
-    inputs = { 'question': 'What is a fish?' }
-    outputs = { 'question_response': 'An animal that lives in water.' }
-    reference_outputs = { 'answer': 'A fish is an aquatic, gill-bearing vetebrate animal.' }
+def describe_judgement():
 
-    expected_response = { 
-        "score": 0.9,
-        "explanation": "The response is essentially correct and matches the core idea of the answer: a fish is an aquatic animal that lives in water. It omits details like being a vertebrate and gill-bearing, but it is still a good paraphrase."
-    }
+    def when_message_body_is_well_formed():
 
-    response = judgement(inputs, outputs, reference_outputs)
-    
-    assert response.get('score') == expected_response.get('score')
-    assert response.get('explanation') == expected_response.get('explanation')
+        def judgement_returns_scoring_response():
+            with patch("src.llm_as_judge.oai_client") as oai_client_mock:
+                mock_llm_response = ns(
+                    choices=[
+                        ns(
+                            message=ns(
+                                parsed=Response(
+                                    score=0.9,
+                                    explanation="The response is essentially correct and matches the core idea of the answer: a fish is an aquatic animal that lives in water. It omits details like being a vertebrate and gill-bearing, but it is still a good paraphrase."
+                                )
+                            )
+                        )
+                    ]
+                )
+                oai_client_mock.beta.chat.completions.parse.return_value = mock_llm_response
+
+                inputs = { 'question': 'What is a fish?' }
+                outputs = { 'question_response': 'An animal that lives in water.' }
+                reference_outputs = { 'answer': 'A fish is an aquatic, gill-bearing vetebrate animal.' }
+
+                expected_response = {
+                    "score": 0.9,
+                    "explanation": "The response is essentially correct and matches the core idea of the answer: a fish is an aquatic animal that lives in water. It omits details like being a vertebrate and gill-bearing, but it is still a good paraphrase."
+                }
+
+                response = judgement(inputs, outputs, reference_outputs)
+
+                assert response.get('score') == expected_response.get('score')
+                assert response.get('explanation') == expected_response.get('explanation')
 
 def describe_evaluation():
 

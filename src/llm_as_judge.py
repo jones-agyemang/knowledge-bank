@@ -16,9 +16,6 @@ load_dotenv()
 # wrap to automatically trace all LLM calls
 oai_client = wrappers.wrap_openai(OpenAI())
 
-"""
-inputs
-"""
 @traceable()
 def quiz_master(inputs: dict) -> dict:
     #Returns the LLMs response to a question
@@ -44,13 +41,20 @@ def correctness_evaluator(
     outputs: dict,
     reference_outputs: dict
 ) -> EvaluationResult:
-    judgement_response = judgement(inputs, outputs, reference_outputs)
+    try:
+        judgement_response = judgement(inputs, outputs, reference_outputs)
+        return EvaluationResult(
+            key="correctness_evaluator",
+            score=judgement_response.get("score"),
+            comment=judgement_response.get("explanation")
+        )
+    except RuntimeError as exception:
+        return EvaluationResult(
+            key="correctness_evaluator",
+            score=0.0,
+            comment="Error whilst evaluating data point"
+        )
 
-    return EvaluationResult(
-        key="correctnes_evaluator",
-        score=judgement_response.get("score"),
-        comment=judgement_response.get("explanation")
-    )
 
 class Response(BaseModel):
     score: float = 0.0
@@ -61,6 +65,14 @@ def judgement(
     outputs: dict,
     reference_outputs: dict
 ) -> dict:
+    #Returns the LLMs judgement of a response(output) to a question(input) against the actual answer(reference output)
+    #Parameters:
+    #   inputs (dict): The question requiring a response
+    #   outputs (dict): The response to the question
+    #   reference_outputs (dict): Ideal response (objective, ground-truth)
+    #Returns:
+    #   response (dict): e.g. { "score": "0.82", explanation: "Commendable response with minor missing details" }
+
     instructions = ("You are a fair judge for a free-text quiz competition")
 
     message_content = f"""
@@ -81,18 +93,23 @@ def judgement(
         response_format=Response
     )
     return response.choices[0].message.parsed.model_dump()
-def fetch_dataset():
+
+def fetch_dataset(ls_client):
     try:
         return ls_client.create_dataset(dataset_name="Mini Knowledge Bank")
     except LangSmithConflictError:
         return ls_client.read_dataset(dataset_name="Mini Knowledge Bank")
 
-ls_client = Client()
-dataset = fetch_dataset()
+def main() -> None:
+    ls_client = Client()
+    dataset = fetch_dataset(ls_client)
 
-results = ls_client.evaluate(
-    quiz_master,
-    data=dataset.name,
-    evaluators=[correctness_evaluator],
-    experiment_prefix="gpt-5.4-mini, baseline"
-)
+    results = ls_client.evaluate(
+        quiz_master,
+        data=dataset.name,
+        evaluators=[correctness_evaluator],
+        experiment_prefix="gpt-5.4-mini, baseline"
+    )
+
+if __name__ == '__main__':
+    main()

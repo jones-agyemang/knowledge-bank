@@ -59,19 +59,19 @@ def correctness_evaluator(
 SYSTEN_RUBRIC_PROMPT = """
 You are an expert evaluator. Grade the model's response based on the following criteria:
 
-    1. Accuracy (0-3 points):
-        - 3 points: Response is perfectly accurate based on reference data
-        - 2 points: Response is mostly accurate, minor details missing
-        - 1 point: Significant inaccuracies or omissions
-        - 0 points: Completely incorrect or non-responsive
+    1. Accuracy Scale:
+        - Response is perfectly accurate based on reference data
+        - Response is mostly accurate, minor details missing
+        - Significant inaccuracies or omissions
+        - Completely incorrect or non-responsive
 
     2. Reasoning Consistency:
-        - Check if the provided reasoning logicallt supports the final answer
+        - Check if the provided reasoning logically supports the final answer
         - Deduct 1 point if the reasoning is flawed, even if the answer is correct
 
     Output your evaluation strictly in the following JSON format:
     {
-        "score": (integer),
+        "score": (float),
         "explanation": "Detailed explanation of your scoring"
     }
 """

@@ -39,10 +39,6 @@ def describe_judgement():
                 )
                 oai_client_mock.beta.chat.completions.parse.return_value = mock_llm_response
 
-                inputs = { 'question': 'What is a fish?' }
-                outputs = { 'question_response': 'An animal that lives in water.' }
-                reference_outputs = { 'answer': 'A fish is an aquatic, gill-bearing vetebrate animal.' }
-
                 expected_response = {
                     "score": 0.9,
                     "explanation": "The response is essentially correct and matches the core idea of the answer: a fish is an aquatic animal that lives in water. It omits details like being a vertebrate and gill-bearing, but it is still a good paraphrase."
@@ -68,6 +64,8 @@ def describe_evaluation():
                 assert evaluation.key == "correctness_evaluator"
                 assert evaluation.score > 0.0
                 assert evaluation.comment == "Not even close!"
+
+                judgement_mock.assert_called_once_with(*judgement_data)
 
 
     def when_judgement_fails():
